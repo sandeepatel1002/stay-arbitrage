@@ -1,0 +1,387 @@
+{
+  "_note": "Curated demo cache (Indore + Jaipur). Schema mirrors real SerpApi google_hotels / google_hotels_property_details responses so parsers are identical either way. The app uses this when the live API fails — the demo never breaks (spec §3.2).",
+  "indore": {
+    "search": {
+      "search_parameters": {
+        "engine": "google_hotels",
+        "q": "Hotels in Indore",
+        "check_in": "2026-11-06",
+        "check_out": "2026-11-09",
+        "adults": 2,
+        "currency": "INR",
+        "gl": "in",
+        "hl": "en"
+      },
+      "total_units": 380,
+      "properties": [
+        {
+          "type": "hotel",
+          "name": "Effotel By Sayaji",
+          "description": "Contemporary hotel 1.8 km from 56 Dukan food street.",
+          "property_token": "indore-1-effotel-sayaji",
+          "gps_coordinates": {"latitude": 22.7315, "longitude": 75.8719},
+          "overall_class": 4,
+          "review_score": 8.3,
+          "reviews": 2871,
+          "rate_per_night": {"lowest": "₹4,189", "extracted_lowest": 4189, "extracted_before_taxes_fees": 3861},
+          "total_rate": {"lowest": "₹13,289", "extracted_lowest": 13289},
+          "deal": "13% cheaper than typical",
+          "amenities": ["Free Wi-Fi", "Pool", "Restaurant", "Free parking", "Elevator"],
+          "nearby_places": [
+            {"name": "56 Dukan Food Street", "description": "2 minutes drive", "distance": 1.8},
+            {"name": "Rajwada Palace", "description": "12 minutes drive", "distance": 4.1}
+          ]
+        },
+        {
+          "type": "hotel",
+          "name": "Radisson Blu Hotel Indore",
+          "description": "Upscale business hotel in the middle of the city.",
+          "property_token": "indore-2-radisson-blu",
+          "overall_class": 5,
+          "review_score": 8.7,
+          "reviews": 3412,
+          "rate_per_night": {"lowest": "₹5,990", "extracted_lowest": 5990},
+          "total_rate": {"lowest": "₹19,710", "extracted_lowest": 19710},
+          "amenities": ["Free Wi-Fi", "Pool", "Spa", "Bar", "Air conditioning", "Elevator"],
+          "nearby_places": [
+            {"name": "56 Dukan Food Street", "description": "3 minutes drive", "distance": 1.1},
+            {"name": "Apna Sweets Indore", "description": "5 minutes walk", "distance": 0.4}
+          ]
+        },
+        {
+          "type": "hotel",
+          "name": "The Grand Bhagwati Palace",
+          "description": "Boutique family hotel near Rajwada, quiet rooms.",
+          "property_token": "indore-3-bhagwati-palace",
+          "overall_class": 5,
+          "review_score": 9.1,
+          "reviews": 1904,
+          "rate_per_night": {"lowest": "₹7,250", "extracted_lowest": 7250},
+          "total_rate": {"lowest": "₹23,400", "extracted_lowest": 23400},
+          "amenities": ["Free Wi-Fi", "Rooftop restaurant", "Quiet rooms", "Elevator", "Airport shuttle"],
+          "nearby_places": [
+            {"name": "56 Dukan Food Street", "description": "5 minutes walk", "distance": 0.9}
+          ]
+        },
+        {
+          "type": "hotel",
+          "name": "Hotel Kumkum Residency",
+          "description": "Simple, super-budget stay popular with families.",
+          "property_token": "indore-4-kumkum-residency",
+          "overall_class": 2,
+          "review_score": 7.6,
+          "reviews": 842,
+          "rate_per_night": {"lowest": "₹2,150", "extracted_lowest": 2150},
+          "total_rate": {"lowest": "₹6,450", "extracted_lowest": 6450},
+          "amenities": ["Free Wi-Fi", "Air conditioning", "24-hour front desk"],
+          "nearby_places": [
+            {"name": "56 Dukan Food Street", "description": "15 minutes drive", "distance": 6.2}
+          ]
+        }
+      ]
+    },
+    "details": {
+      "indore-1-effotel-sayaji": {
+        "name": "Effotel By Sayaji",
+        "ratings": "4.2/5",
+        "review_summary": {"total_user_review_count": 2871, "breakdown": {"nice": "31%", "excellent": "48%"}},
+        "reviews_breakdown": {"excellent": 1379, "great": 704, "good": 590, "average": 140, "poor": 58},
+        "verified_amenities": {
+          "general": [{"key": "elevator", "value": "Elevator"}, {"key": "pool", "value": "Pool"}],
+          "room": [{"key": "ac", "value": "Air conditioning"}],
+          "services": [{"key": "wifi", "value": "Free Wi-Fi"}]
+        },
+        "prices": [
+          {
+            "source": "Agoda",
+            "rate_per_night": {"lowest": "₹3,990", "extracted_lowest": 3990},
+            "total_rate": {"lowest": "₹12,670", "extracted_lowest": 12670},
+            "free_cancellation": "Free cancellation before 2026-11-05",
+            "payment": "Pay online",
+            "meal_plan": "Room only",
+            "link": "https://www.agoda.com/effotel-sayaji-indore"
+          },
+          {
+            "source": "Booking.com",
+            "rate_per_night": {"lowest": "₹4,100", "extracted_lowest": 4100},
+            "total_rate": {"lowest": "₹12,900", "extracted_lowest": 12900},
+            "free_cancellation": "Free cancellation before 2026-11-04",
+            "payment": "Pay online",
+            "meal_plan": "Breakfast included",
+            "link": "https://www.booking.com/effotel-sayaji-indore"
+          },
+          {
+            "source": "MakeMyTrip",
+            "rate_per_night": {"lowest": "₹4,350", "extracted_lowest": 4350},
+            "total_rate": {"lowest": "₹13,350", "extracted_lowest": 13350},
+            "payment": "Pay at hotel",
+            "meal_plan": "Breakfast included",
+            "link": "https://www.makemytrip.com/effotel-sayaji-indore"
+          },
+          {
+            "source": "Official Site",
+            "rate_per_night": {"lowest": "₹4,600", "extracted_lowest": 4600},
+            "total_rate": {"lowest": "₹14,100", "extracted_lowest": 14100},
+            "meal_plan": "Room only",
+            "link": "https://effotel.com/indore"
+          }
+        ]
+      },
+      "indore-2-radisson-blu": {
+        "name": "Radisson Blu Hotel Indore",
+        "ratings": "4.4/5",
+        "reviews_breakdown": {"excellent": 2010, "good": 1040, "average": 265, "poor": 97},
+        "verified_amenities": {
+          "general": [{"key": "elevator", "value": "Elevator"}, {"key": "bar", "value": "Bar"}, {"key": "spa", "value": "Spa"}],
+          "room": [{"key": "ac", "value": "Air conditioning"}, {"key": "soundproof", "value": "Soundproof rooms"}]
+        },
+        "prices": [
+          {
+            "source": "Agoda",
+            "rate_per_night": {"lowest": "₹5,780", "extracted_lowest": 5780},
+            "total_rate": {"lowest": "₹18,900", "extracted_lowest": 18900},
+            "free_cancellation": "Free cancellation before 2026-11-05",
+            "meal_plan": "Room only",
+            "link": "https://www.agoda.com/radisson-blu-indore"
+          },
+          {
+            "source": "Priceline",
+            "rate_per_night": {"lowest": "₹6,100", "extracted_lowest": 6100},
+            "total_rate": {"lowest": "₹19,600", "extracted_lowest": 19600},
+            "free_cancellation": "Free cancellation before 2026-11-03",
+            "meal_plan": "Breakfast included",
+            "link": "https://www.priceline.com/radisson-blu-indore"
+          },
+          {
+            "source": "Official Site",
+            "rate_per_night": {"lowest": "₹6,199", "extracted_lowest": 6199},
+            "total_rate": {"lowest": "₹19,710", "extracted_lowest": 19710},
+            "meal_plan": "Breakfast included",
+            "link": "https://radissonhotels.com/radisson-blu-indore"
+          }
+        ]
+      },
+      "indore-3-bhagwati-palace": {
+        "name": "The Grand Bhagwati Palace",
+        "ratings": "4.6/5",
+        "reviews_breakdown": {"excellent": 1544, "good": 268, "average": 73, "poor": 19},
+        "verified_amenities": {
+          "general": [{"key": "elevator", "value": "Elevator"}, {"key": "quiet", "value": "Quiet rooms"}],
+          "services": [{"key": "shuttle", "value": "Airport shuttle"}]
+        },
+        "prices": [
+          {
+            "source": "Agoda",
+            "rate_per_night": {"lowest": "₹6,990", "extracted_lowest": 6990},
+            "total_rate": {"lowest": "₹22,500", "extracted_lowest": 22500},
+            "free_cancellation": "Free cancellation before 2026-11-06",
+            "meal_plan": "Breakfast included",
+            "link": "https://www.agoda.com/bhagwati-palace-indore"
+          },
+          {
+            "source": "Booking.com",
+            "rate_per_night": {"lowest": "₹7,100", "extracted_lowest": 7100},
+            "total_rate": {"lowest": "₹22,900", "extracted_lowest": 22900},
+            "payment": "Pay at hotel",
+            "meal_plan": "Room only",
+            "link": "https://www.booking.com/bhagwati-palace-indore"
+          },
+          {
+            "source": "MakeMyTrip",
+            "rate_per_night": {"lowest": "₹7,250", "extracted_lowest": 7250},
+            "total_rate": {"lowest": "₹23,400", "extracted_lowest": 23400},
+            "meal_plan": "Room only",
+            "link": "https://www.makemytrip.com/bhagwati-palace-indore"
+          }
+        ]
+      },
+      "indore-4-kumkum-residency": {
+        "name": "Hotel Kumkum Residency",
+        "ratings": "3.9/5",
+        "reviews_breakdown": {"excellent": 210, "good": 401, "average": 180, "poor": 51},
+        "verified_amenities": {"room": [{"key": "ac", "value": "Air conditioning"}]},
+        "prices": [
+          {
+            "source": "Agoda",
+            "rate_per_night": {"lowest": "₹2,150", "extracted_lowest": 2150},
+            "total_rate": {"lowest": "₹6,450", "extracted_lowest": 6450},
+            "meal_plan": "Room only",
+            "link": "https://www.agoda.com/kumkum-residency-indore"
+          },
+          {
+            "source": "MakeMyTrip",
+            "rate_per_night": {"lowest": "₹2,220", "extracted_lowest": 2220},
+            "total_rate": {"lowest": "₹6,660", "extracted_lowest": 6660},
+            "free_cancellation": "Free cancellation before 2026-11-05",
+            "meal_plan": "Room only",
+            "link": "https://www.makemytrip.com/kumkum-residency-indore"
+          }
+        ]
+      }
+    }
+  },
+  "jaipur": {
+    "search": {
+      "search_parameters": {
+        "engine": "google_hotels",
+        "q": "Hotels in Jaipur",
+        "check_in": "2026-12-04",
+        "check_out": "2026-12-07",
+        "adults": 2,
+        "currency": "INR",
+        "gl": "in",
+        "hl": "en"
+      },
+      "properties": [
+        {
+          "type": "hotel",
+          "name": "Pink City Heritage Haveli",
+          "property_token": "jaipur-1-pink-city-haveli",
+          "overall_class": 3,
+          "review_score": 8.1,
+          "reviews": 1150,
+          "rate_per_night": {"lowest": "₹2,890", "extracted_lowest": 2890},
+          "total_rate": {"lowest": "₹8,670", "extracted_lowest": 8670},
+          "amenities": ["Free Wi-Fi", "Heritage courtyard", "Air conditioning"],
+          "nearby_places": [{"name": "Hawa Mahal", "description": "8 minutes walk", "distance": 0.7}]
+        },
+        {
+          "type": "hotel",
+          "name": "Umaid Bhawan Heritage Retreat",
+          "property_token": "jaipur-2-umaid-bhawan",
+          "overall_class": 4,
+          "review_score": 8.6,
+          "reviews": 2278,
+          "rate_per_night": {"lowest": "₹4,690", "extracted_lowest": 4690},
+          "total_rate": {"lowest": "₹14,200", "extracted_lowest": 14200},
+          "amenities": ["Free Wi-Fi", "Pool", "Rooftop restaurant", "Elevator"],
+          "nearby_places": [{"name": "Hawa Mahal", "description": "12 minutes walk", "distance": 1.0}]
+        },
+        {
+          "type": "hotel",
+          "name": "Trident Jaipur",
+          "property_token": "jaipur-3-trident",
+          "overall_class": 5,
+          "review_score": 9.0,
+          "reviews": 3055,
+          "rate_per_night": {"lowest": "₹9,800", "extracted_lowest": 9800},
+          "total_rate": {"lowest": "₹30,750", "extracted_lowest": 30750},
+          "amenities": ["Free Wi-Fi", "Pool", "Spa", "Garden", "Elevator"],
+          "nearby_places": [{"name": "Jal Mahal", "description": "6 minutes drive", "distance": 3.4}]
+        },
+        {
+          "type": "hotel",
+          "name": "Hotel Arya Boutique",
+          "property_token": "jaipur-4-arya-boutique",
+          "overall_class": 2,
+          "review_score": 7.8,
+          "reviews": 640,
+          "rate_per_night": {"lowest": "₹1,990", "extracted_lowest": 1990},
+          "total_rate": {"lowest": "₹5,970", "extracted_lowest": 5970},
+          "amenities": ["Free Wi-Fi", "Air conditioning", "24-hour front desk"]
+        }
+      ]
+    },
+    "details": {
+      "jaipur-1-pink-city-haveli": {
+        "name": "Pink City Heritage Haveli",
+        "ratings": "4.1/5",
+        "reviews_breakdown": {"excellent": 502, "good": 440, "average": 155, "poor": 53},
+        "verified_amenities": {"room": [{"key": "ac", "value": "Air conditioning"}]},
+        "prices": [
+          {
+            "source": "Booking.com",
+            "rate_per_night": {"lowest": "₹2,890", "extracted_lowest": 2890},
+            "total_rate": {"lowest": "₹8,670", "extracted_lowest": 8670},
+            "free_cancellation": "Free cancellation before 2026-12-03",
+            "meal_plan": "Breakfast included",
+            "link": "https://www.booking.com/pink-city-haveli-jaipur"
+          },
+          {
+            "source": "MakeMyTrip",
+            "rate_per_night": {"lowest": "₹3,050", "extracted_lowest": 3050},
+            "total_rate": {"lowest": "₹9,150", "extracted_lowest": 9150},
+            "meal_plan": "Room only",
+            "link": "https://www.makemytrip.com/pink-city-haveli-jaipur"
+          }
+        ]
+      },
+      "jaipur-2-umaid-bhawan": {
+        "name": "Umaid Bhawan Heritage Retreat",
+        "ratings": "4.3/5",
+        "reviews_breakdown": {"excellent": 1301, "good": 720, "average": 200, "poor": 57},
+        "verified_amenities": {
+          "general": [{"key": "elevator", "value": "Elevator"}, {"key": "pool", "value": "Pool"}],
+          "room": [{"key": "soundproof", "value": "Soundproof rooms"}]
+        },
+        "prices": [
+          {
+            "source": "Agoda",
+            "rate_per_night": {"lowest": "₹4,590", "extracted_lowest": 4590},
+            "total_rate": {"lowest": "₹14,000", "extracted_lowest": 14000},
+            "free_cancellation": "Free cancellation before 2026-12-06",
+            "meal_plan": "Room only",
+            "link": "https://www.agoda.com/umaid-bhawan-jaipur"
+          },
+          {
+            "source": "Booking.com",
+            "rate_per_night": {"lowest": "₹4,690", "extracted_lowest": 4690},
+            "total_rate": {"lowest": "₹14,200", "extracted_lowest": 14200},
+            "free_cancellation": "Free cancellation before 2026-12-05",
+            "meal_plan": "Breakfast included",
+            "link": "https://www.booking.com/umaid-bhawan-jaipur"
+          },
+          {
+            "source": "Official Site",
+            "rate_per_night": {"lowest": "₹4,990", "extracted_lowest": 4990},
+            "total_rate": {"lowest": "₹15,100", "extracted_lowest": 15100},
+            "meal_plan": "Breakfast included",
+            "link": "https://umaidbhawan.com/heritage-retreat"
+          }
+        ]
+      },
+      "jaipur-3-trident": {
+        "name": "Trident Jaipur",
+        "ratings": "4.5/5",
+        "reviews_breakdown": {"excellent": 2101, "good": 700, "average": 190, "poor": 64},
+        "verified_amenities": {
+          "general": [{"key": "elevator", "value": "Elevator"}, {"key": "spa", "value": "Spa"}],
+          "room": [{"key": "soundproof", "value": "Soundproof rooms"}]
+        },
+        "prices": [
+          {
+            "source": "Agoda",
+            "rate_per_night": {"lowest": "₹9,400", "extracted_lowest": 9400},
+            "total_rate": {"lowest": "₹29,900", "extracted_lowest": 29900},
+            "free_cancellation": "Free cancellation before 2026-12-06",
+            "meal_plan": "Room only",
+            "link": "https://www.agoda.com/trident-jaipur"
+          },
+          {
+            "source": "Priceline",
+            "rate_per_night": {"lowest": "₹9,800", "extracted_lowest": 9800},
+            "total_rate": {"lowest": "₹30,750", "extracted_lowest": 30750},
+            "free_cancellation": "Free cancellation before 2026-12-05",
+            "meal_plan": "Breakfast included",
+            "link": "https://www.priceline.com/trident-jaipur"
+          }
+        ]
+      },
+      "jaipur-4-arya-boutique": {
+        "name": "Hotel Arya Boutique",
+        "ratings": "3.8/5",
+        "reviews_breakdown": {"excellent": 120, "good": 290, "average": 180, "poor": 50},
+        "verified_amenities": {"room": [{"key": "ac", "value": "Air conditioning"}]},
+        "prices": [
+          {
+            "source": "MakeMyTrip",
+            "rate_per_night": {"lowest": "₹1,990", "extracted_lowest": 1990},
+            "total_rate": {"lowest": "₹5,970", "extracted_lowest": 5970},
+            "meal_plan": "Room only",
+            "link": "https://www.makemytrip.com/arya-boutique-jaipur"
+          }
+        ]
+      }
+    }
+  }
+}

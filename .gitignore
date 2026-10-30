@@ -1,0 +1,17 @@
+# Secrets
+.env
+
+# Local agent state
+.opencode/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+
+# OS
+Thumbs.db
+Desktop.ini
+.DS_Store

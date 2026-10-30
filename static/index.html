@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>StayArbitrage — AI Hotel Matchmaker</title>
+  <link rel="icon" href="data:," />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .screen { display: none; }
+    .screen.active { display: block; }
+    .why-badge { white-space: pre-line; }
+    #telemetry-lift { transition: transform .25s ease; }
+    #telemetry-lift.open { transform: translateY(0); }
+  </style>
+</head>
+<body class="bg-slate-100 min-h-screen text-slate-800 font-sans pb-32">
+
+  <!-- Toast -->
+  <div id="toast" class="hidden fixed left-1/2 top-20 -translate-x-1/2 z-50 bg-slate-900 text-white text-sm px-4 py-2 rounded-full shadow-lg"></div>
+
+  <!-- Top bar -->
+  <header class="max-w-5xl mx-auto px-4 pt-6 pb-2 flex items-center justify-between">
+    <div class="flex items-baseline gap-2 cursor-pointer" onclick="goHome()">
+      <span class="text-2xl">🏨</span>
+      <h1 class="text-xl font-bold tracking-tight">Stay<span class="text-indigo-600">Arbitrage</span></h1>
+    </div>
+    <div class="flex items-center gap-2">
+      <button id="health-chip" class="text-xs px-2 py-1 rounded-full bg-emerald-100 text-emerald-700 font-medium" onclick="checkHealth()">● connecting…</button>
+      <button class="text-xs px-3 py-1 rounded-full bg-slate-800 text-white font-medium" onclick="toggleDrawer()">AI Under the Hood 🔍</button>
+    </div>
+  </header>
+
+  <main class="max-w-5xl mx-auto px-4">
+
+    <!-- ================= SCREEN 1 — Home & Intent Search ================= -->
+    <section id="screen-1" class="screen active">
+      <div class="mt-10 mb-6 text-center">
+        <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight">Tell us how you actually travel.</h2>
+        <p class="text-slate-500 mt-2">One messy sentence is enough. We parse the chaos.</p>
+      </div>
+
+      <div class="bg-white rounded-2xl shadow-lg p-4 md:p-6 border border-slate-200">
+        <textarea id="prompt" rows="3" maxlength="400"
+          class="w-full resize-none text-lg md:text-xl outline-none placeholder:text-slate-400"
+          placeholder="e.g. peaceful place in Indore near 56 Dukan, elderly parents coming, under 8000"></textarea>
+        <div class="flex flex-wrap gap-2 my-3" id="example-chips">
+          <button class="text-xs px-3 py-1.5 rounded-full bg-indigo-50 text-indigo-700 hover:bg-indigo-100" onclick="useExample(0)">🏞️ peaceful Indore, parents, under 8000</button>
+          <button class="text-xs px-3 py-1.5 rounded-full bg-indigo-50 text-indigo-700 hover:bg-indigo-100" onclick="useExample(1)">🏰 Jaipur heritage stay, family of 4, 9k budget</button>
+          <button class="text-xs px-3 py-1.5 rounded-full bg-indigo-50 text-indigo-700 hover:bg-indigo-100" onclick="useExample(2)">💸 anywhere in Indore, cheapest clean option</button>
+        </div>
+
+        <!-- Structured chips -->
+        <div class="flex flex-wrap gap-3 pt-3 border-t border-slate-100">
+          <label class="flex items-center gap-2 bg-slate-50 rounded-lg px-3 py-2 text-sm">
+            <span>🏙️</span><input id="chip-city" list="city-options" placeholder="City ✱" class="w-28 bg-transparent outline-none" />
+            <datalist id="city-options"><option value="Indore"></option><option value="Jaipur"></option></datalist>
+          </label>
+          <label class="flex items-center gap-2 bg-slate-50 rounded-lg px-3 py-2 text-sm">
+            <span>📅</span><input id="chip-dates" placeholder="Dates ✱ (e.g. Nov 6–9)" class="w-44 bg-transparent outline-none" />
+          </label>
+          <label class="flex items-center gap-2 bg-slate-50 rounded-lg px-3 py-2 text-sm">
+            <span>👥</span><input id="chip-guests" type="number" min="1" max="16" placeholder="Guests ✱" class="w-20 bg-transparent outline-none" />
+          </label>
+          <label class="flex items-center gap-2 bg-slate-50 rounded-lg px-3 py-2 text-sm">
+            <span>💰</span><input id="chip-budget" type="number" min="0" placeholder="Max budget/night ₹ (optional)" class="w-40 bg-transparent outline-none" />
+          </label>
+        </div>
+
+        <button id="search-btn" onclick="runSearch()"
+          class="mt-4 w-full md:w-auto bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-semibold px-6 py-3 rounded-xl transition">
+          Find my stay →
+        </button>
+      </div>
+
+      <div id="intent-summary" class="hidden mt-6 bg-white border border-indigo-100 rounded-2xl p-4 text-sm shadow"></div>
+
+      <!-- Owner rule: required booking params are prompted, never assumed. -->
+      <div id="ask-details" class="hidden mt-6 bg-amber-50 border border-amber-300 rounded-2xl p-5 shadow">
+        <h3 class="font-bold text-amber-900">📅 Almost there — hotels need these to quote real prices</h3>
+        <p class="text-sm text-amber-800 mt-1">Prices change with dates &amp; guest count, so I won't guess these for you. Fill in what's missing:</p>
+        <div class="grid sm:grid-cols-2 gap-4 mt-4">
+          <label class="text-sm font-medium text-amber-900" id="ask-label-city">City
+            <input id="ask-city" placeholder="e.g. Indore" class="mt-1 w-full rounded-lg border border-amber-200 px-3 py-2 text-sm" />
+          </label>
+          <label class="text-sm font-medium text-amber-900" id="ask-label-guests">Guests (incl. infants)
+            <input id="ask-guests" type="number" min="1" max="16" placeholder="e.g. 2" class="mt-1 w-full rounded-lg border border-amber-200 px-3 py-2 text-sm" />
+          </label>
+          <label class="text-sm font-medium text-amber-900" id="ask-label-check_in">Check-in
+            <input id="ask-in" type="date" class="mt-1 w-full rounded-lg border border-amber-200 px-3 py-2 text-sm" />
+          </label>
+          <label class="text-sm font-medium text-amber-900" id="ask-label-check_out">Check-out
+            <input id="ask-out" type="date" class="mt-1 w-full rounded-lg border border-amber-200 px-3 py-2 text-sm" />
+          </label>
+        </div>
+        <button id="ask-btn" onclick="completeSearch()"
+          class="mt-4 bg-amber-600 hover:bg-amber-700 text-white font-semibold px-6 py-2.5 rounded-xl transition">
+          Complete search →
+        </button>
+      </div>
+    </section>
+
+    <!-- ================= SCREEN 2 — Curated 3-Match Podium ================= -->
+    <section id="screen-2" class="screen">
+      <div class="mt-8 flex items-center justify-between gap-3 flex-wrap">
+        <div>
+          <h2 class="text-2xl font-extrabold tracking-tight">Your 3-match podium</h2>
+          <p class="text-slate-500 text-sm">Top picks from the verified candidate pool, matched to YOUR needs.</p>
+        </div>
+        <button class="text-sm text-slate-600 hover:text-slate-900" onclick="goHome()">← New search</button>
+      </div>
+      <div id="podium" class="mt-6 grid gap-5 md:grid-cols-3"></div>
+    </section>
+
+    <!-- ================= SCREEN 3 — Price Arbitrage & Booking Matrix ================= -->
+    <section id="screen-3" class="screen">
+      <div class="mt-8 flex items-center justify-between gap-3 flex-wrap">
+        <div>
+          <h2 class="text-2xl font-extrabold tracking-tight" id="matrix-title">Price arbitrage</h2>
+          <p class="text-slate-500 text-sm" id="matrix-sub">Same room. Different platforms. Very different prices.</p>
+        </div>
+        <button class="text-sm text-slate-600 hover:text-slate-900" onclick="backToPodium()">← Back to podium</button>
+      </div>
+
+      <div id="savings-ribbon" class="hidden mt-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-2xl p-4 font-semibold"></div>
+      <div id="fare-list" class="mt-4 space-y-3"></div>
+    </section>
+  </main>
+
+  <!-- ================= TELEMETRY DRAWER ================= -->
+  <div id="telemetry-lift" class="fixed inset-x-0 bottom-0 z-50 translate-y-[calc(100%-3rem)]">
+    <div class="max-w-5xl mx-auto px-4">
+      <div class="bg-slate-900 text-white rounded-t-2xl shadow-2xl border border-slate-700">
+        <button class="w-full flex items-center justify-between px-5 py-3" onclick="toggleDrawer()">
+          <span class="font-semibold text-sm">🔍 AI Under the Hood <span id="tel-count" class="font-normal text-slate-400">— every AI &amp; data call, unedited</span></span>
+          <span id="drawer-arrow">▲</span>
+        </button>
+        <div id="drawer-body" class="hidden px-5 pb-5 max-h-72 overflow-y-auto space-y-2 text-xs font-mono">
+          <div class="flex justify-end"><button class="bg-slate-700 hover:bg-slate-600 px-2 py-1 rounded" onclick="copyTelemetry(event)">Copy raw telemetry</button></div>
+          <div id="tel-list" class="space-y-2"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+"use strict";
+
+/* ---------------- state ---------------- */
+const S = { screen: 1, lastSearch: null, lastMatrix: null };
+let TEL = [];
+let drawerOpen = false;
+
+/* ---------------- helpers ---------------- */
+const $ = (id) => document.getElementById(id);
+const money = (n) => (n == null ? "—" : "₹" + Number(n).toLocaleString("en-IN"));
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+function toast(msg) {
+  const t = $("toast");
+  t.textContent = msg;
+  t.classList.remove("hidden");
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.add("hidden"), 3800);
+}
+
+function spin(on, btnId = "search-btn") {
+  const b = $(btnId);
+  if (b) { b.disabled = true; b._old = b._old ?? b.textContent; if (on) b.textContent = "🧠 AI working…"; else b.textContent = b._old; }
+}
+function unspin(btnId = "search-btn") { spin(false, btnId); }
+
+function showScreen(n) {
+  S.screen = n;
+  document.querySelectorAll(".screen").forEach((s) => s.classList.remove("active"));
+  $("screen-" + n).classList.add("active");
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function goHome() { showScreen(1); }
+function backToPodium() { showScreen(2); }
+
+function captureTelemetry(list, tag) {
+  if (!Array.isArray(list)) return;
+  TEL.push(...list.filter(Boolean).map((t) => ({ ...t, _from: tag })));
+  renderTelemetry();
+}
+
+function sourceChip(source) {
+  const styles = {
+    live: "bg-emerald-500/20 text-emerald-300",
+    cache: "bg-amber-500/20 text-amber-300",
+    mock: "bg-sky-500/20 text-sky-300",
+  };
+  return '<span class="px-2 py-0.5 rounded-full font-sans text-[10px] font-semibold ' + (styles[source] || styles.mock) + '">' + esc(source || "mock") + "</span>";
+}
+
+function renderTelemetry() {
+  $("tel-count").textContent = "— " + TEL.length + " calls, unedited";
+  const host = $("tel-list");
+  if (!TEL.length) { host.innerHTML = '<p class="text-slate-400">Run a search and every AI call shows up here — model, latency, tokens, raw JSON.</p>'; return; }
+  host.innerHTML = TEL.map((t, i) => `
+    <div class="bg-slate-800 rounded-lg p-3">
+      <div class="flex flex-wrap items-center gap-2 font-sans">
+        <span class="font-semibold text-slate-100">${esc(t.engine || "?")}</span>
+        ${sourceChip(t.source)}
+        <span class="text-slate-300">${esc(t.model || "")}</span>
+        <span class="text-slate-500">• ${esc(t.latency_ms ?? 0)} ms</span>
+        <span class="text-slate-500">• ${esc(t.tokens_in ?? 0)} in / ${esc(t.tokens_out ?? 0)} out tok</span>
+      </div>
+      ${t.raw_json ? '<details class="mt-1"><summary class="cursor-pointer text-slate-400 select-none">raw json</summary><pre class="mt-1 text-slate-300 overflow-x-auto">' + esc(JSON.stringify(t.raw_json, null, 1)) + "</pre></details>" : ""}
+    </div>`).join("");
+}
+
+function toggleDrawer() {
+  drawerOpen = !drawerOpen;
+  $("telemetry-lift").classList.toggle("open", drawerOpen);
+  $("drawer-body").classList.toggle("hidden", !drawerOpen);
+  $("drawer-arrow").textContent = drawerOpen ? "▼" : "▲";
+}
+
+function copyTelemetry(ev) {
+  ev.stopPropagation();
+  navigator.clipboard.writeText(JSON.stringify(TEL, null, 1)).then(() => toast("Telemetry copied for the judges 👇"));
+}
+
+function checkHealth() {
+  fetch("/api/health").then((r) => r.json()).then((h) => {
+    const chip = $("health-chip");
+    const serp = h.serpapi === "ok" ? "SerpApi ✓" : "SerpApi ✗";
+    const ai = h.ai === "ok" ? "AI ✓" : "AI ✗";
+    const missing = serp.includes("✗") || ai.includes("✗");
+    chip.textContent = `● live · ${serp} · ${ai}`;
+    chip.className = missing
+      ? "text-xs px-2 py-1 rounded-full bg-amber-100 text-amber-700 font-medium"
+      : "text-xs px-2 py-1 rounded-full bg-emerald-100 text-emerald-700 font-medium";
+  }).catch(() => {
+    const chip = $("health-chip");
+    chip.textContent = "● backend offline";
+    chip.className = "text-xs px-2 py-1 rounded-full bg-rose-100 text-rose-700 font-medium";
+  });
+}
+
+/* ---------------- screen 1 ---------------- */
+function useExample(i) {
+  const examples = [
+    "peaceful place in Indore near 56 Dukan, elderly parents coming, under 8000",
+    "Jaipur heritage stay for family of 4, peaceful, under 9000",
+    "cheapest clean hotel in Indore",
+  ];
+  $("prompt").value = examples[i];
+}
+
+function collectChips() {
+  const chips = {};
+  const city = $("chip-city").value.trim();
+  if (city) chips.city = city;
+  const dates = $("chip-dates").value.trim();
+  if (dates) chips.dates = dates;
+  const guests = $("chip-guests").value;
+  if (guests) chips.guests = parseInt(guests, 10) || null;
+  const budget = $("chip-budget").value;
+  if (budget) chips.max_budget = parseInt(budget, 10) || null;
+  // Structured dates from the "complete your details" panel (exact ISO days).
+  const askIn = $("ask-in").value;
+  const askOut = $("ask-out").value;
+  if (askIn) chips.check_in = askIn;
+  if (askOut) chips.check_out = askOut;
+  return chips;
+}
+
+function openAskPanel(body) {
+  const missing = body.missing || [];
+  const partial = body.partial || {};
+  // Pre-fill what the user already told us; leave only the gaps.
+  if (partial.city && !$("chip-city").value.trim()) $("ask-city").value = partial.city;
+  if (partial.guests && !$("chip-guests").value) $("ask-guests").value = partial.guests;
+  const today = new Date().toISOString().slice(0, 10);
+  $("ask-in").min = today;
+  $("ask-out").min = today;
+  ["city", "guests", "check_in", "check_out"].forEach((f) => {
+    const label = $("ask-label-" + f);
+    if (!label) return;
+    const isMissing = missing.includes(f);
+    label.classList.toggle("text-rose-600", isMissing);
+    label.classList.toggle("font-bold", isMissing);
+  });
+  $("ask-details").classList.remove("hidden");
+  $("ask-details").scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
+function completeSearch() {
+  // Fold the panel values into the structured chips, then re-run the search.
+  const askCity = $("ask-city").value.trim();
+  const askGuests = $("ask-guests").value;
+  if (askCity && !$("chip-city").value.trim()) $("chip-city").value = askCity;
+  if (askGuests && !$("chip-guests").value) $("chip-guests").value = askGuests;
+  const ci = $("ask-in").value;
+  const co = $("ask-out").value;
+  if (ci && co && co <= ci) { toast("Check-out must be after check-in 📅"); return; }
+  runSearch();
+}
+
+async function runSearch() {
+  const message = $("prompt").value.trim();
+  const chips = collectChips();
+  if (!message && !chips.city) { toast("Type where you want to go, or pick a City chip first ✍️"); return; }
+  spin(true);
+  const t0 = performance.now();
+  try {
+    const r = await fetch("/api/search", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message, chips }),
+    });
+    const errBody = r.ok ? null : await r.json().catch(() => ({}));
+    if (!r.ok) {
+      if (r.status === 422 && Array.isArray(errBody.missing)) {
+        // Must-pass parameters are missing — prompt with the details panel.
+        openAskPanel(errBody);
+        toast(errBody.detail || "A few booking details are still needed.");
+        return;
+      }
+      toast(errBody.detail || `Search failed (HTTP ${r.status}) — check the health chip top-right.`);
+      return;
+    }
+    $("ask-details").classList.add("hidden");
+    const body = await r.json();
+    S.lastSearch = body;
+    captureTelemetry(body.telemetry, "screen1→2");
+    renderIntentSummary(body.intent);
+    renderPodium(body.matches || []);
+    if ((body.matches || []).length < 1) {
+      toast("No hotels found for that ask — try a wider budget.");
+      showScreen(1);
+      return;
+    }
+    showScreen(2);
+  } catch (err) {
+    console.error("search failed", err);
+    const waited = Math.round(performance.now() - t0);
+    toast(waited > 8000 ? "The AI is thinking hard; try again in a few seconds." : "Something went sideways — try again in a moment.");
+  } finally {
+    unspin();
+  }
+}
+
+function renderIntentSummary(intent) {
+  const box = $("intent-summary");
+  const filters = (intent.semantic_filters || []).map((f) => f.value).join(" · ");
+  const bits = [];
+  if (intent.city) bits.push("📍 " + intent.city.charAt(0).toUpperCase() + intent.city.slice(1));
+  if (intent.check_in && intent.check_out) {
+    const nights = intent.nights || "";
+    bits.push("📅 " + intent.check_in + " → " + intent.check_out + (nights ? " · " + nights + " nights" : ""));
+  }
+  if (intent.guests) bits.push("👥 " + intent.guests + " guests");
+  if (intent.max_budget) bits.push("💰 " + money(intent.max_budget) + "/max");
+  if (filters) bits.push("🧠 " + filters);
+  box.innerHTML = '<div class="flex gap-2 flex-wrap font-medium">' + bits.map(esc).join('<span class="text-slate-300">|</span>') + "</div>" +
+    '<p class="text-slate-500 mt-1">The AI parsed this from your message — hard parameters feed the live search engine.</p>';
+  box.classList.remove("hidden");
+}
+
+/* ---------------- screen 2 ---------------- */
+const SLOT_STYLES = {
+  best_overall_match: { crown: "🏆 Best Overall Match", ribbon: "from-amber-400 to-yellow-500", chip: "bg-amber-100 text-amber-800", grad: "bg-gradient-to-br from-indigo-500 to-violet-600" },
+  value_pick: { crown: "💵 Value Pick", ribbon: "from-emerald-400 to-teal-500", chip: "bg-emerald-100 text-emerald-800", grad: "bg-gradient-to-br from-emerald-500 to-teal-600" },
+  premium_gem: { crown: "💎 Premium Gem", ribbon: "from-fuchsia-400 to-pink-500", chip: "bg-fuchsia-100 text-fuchsia-800", grad: "bg-gradient-to-br from-fuchsia-500 to-pink-600" },
+};
+
+function renderPodium(matches) {
+  const podium = $("podium");
+  podium.innerHTML = "";
+  matches.forEach((m, i) => {
+    const st = SLOT_STYLES[m.slot] || SLOT_STYLES.best_overall_match;
+    const card = document.createElement("article");
+    card.className = "bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden flex flex-col" + (i === 1 ? " md:transform md:scale-105 md:shadow-2xl" : "");
+    const amenties = (m.amenities || []).slice(0, 4).map((a) => '<span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-[11px]">' + esc(a) + "</span>").join("");
+    card.innerHTML = `
+      <div class="${st.grad} p-4 text-white">
+        <div class="text-xs font-bold uppercase tracking-wider opacity-90">${st.crown}</div>
+        <h3 class="text-lg font-extrabold leading-snug mt-1">${esc(m.name)}</h3>
+        <div class="text-sm opacity-90 mt-1">${esc(m.stars ? m.stars + "★" : "")} ${m.review_score ? '· score ' + esc(m.review_score) + "/10" : ""}</div>
+      </div>
+      <div class="p-4 flex flex-col gap-3 grow">
+        <div class="flex items-baseline gap-1">
+          <span class="text-slate-500 text-sm">from</span>
+          <span class="text-2xl font-extrabold">${money(m.rate_per_night)}</span>
+          <span class="text-slate-400 text-sm">/night</span>
+        </div>
+        <div class="flex flex-wrap gap-1">${amenties}</div>
+        <div class="why-badge ${st.chip} rounded-xl p-3 text-xs leading-relaxed shadow-inner">${esc(m.why_fits_you || "AI is crafting your personalized badge…")}</div>
+        <button class="mt-auto w-full bg-slate-900 hover:bg-slate-700 text-white text-sm font-semibold py-2.5 rounded-xl transition">
+          ⚖️ Compare Live Deals &amp; Perks
+        </button>
+      </div>`;
+    card.querySelector("button").onclick = () => openDetails(m);
+    podium.appendChild(card);
+  });
+}
+
+/* ---------------- screen 3 ---------------- */
+async function openDetails(match) {
+  spin(true, "search-btn");
+  const it = (S.lastSearch && S.lastSearch.intent) || {};
+  if (!it.check_in || !it.check_out || !it.guests) {
+    unspin("search-btn");
+    toast("I need check-in/check-out dates & guests to quote the stay — run a search first 📅");
+    showScreen(1);
+    return;
+  }
+  try {
+    const params = new URLSearchParams({
+      guests: it.guests,
+      check_in: it.check_in,
+      check_out: it.check_out,
+    });
+    const url = "/api/property/" + encodeURIComponent(match.property_token) + "?" + params.toString();
+    const r = await fetch(url);
+    if (!r.ok) {
+      const errBody = await r.json().catch(() => ({}));
+      toast(errBody.detail || (r.status === 404
+        ? "That hotel's details are unavailable today — try another card."
+        : `Couldn't load live deals (HTTP ${r.status}) — check the health chip top-right.`));
+      return;
+    }
+    const body = await r.json();
+    S.lastMatrix = { ...body, match };
+    captureTelemetry(body.telemetry, "screen3");
+    renderMatrix(body, match);
+    showScreen(3);
+  } catch (err) {
+    console.error("details failed", err);
+    toast("Couldn't load live deals right now — try again in a moment.");
+  } finally {
+    unspin("search-btn");
+  }
+}
+
+const OTALOGOS = {
+  "agoda": "🟣 Agoda",
+  "booking.com": "🔵 Booking.com",
+  "priceline": "⚡ Priceline",
+  "makemytrip": "🔴 MakeMyTrip",
+  "official site": "🏛️ Official Site",
+  "trivago": "🟠 Trivago",
+  "expedia": "🌐 Expedia",
+  "goibibo": "🟠 Goibibo",
+  ".cleartrip": "🟡 Cleartrip",
+};
+function platformLabel(source) { return OTALOGOS[String(source).toLowerCase()] || "🛒 " + source; }
+
+function renderMatrix(data, match) {
+  $("matrix-title").textContent = "Price arbitrage — " + (data.hotel?.name || match.name);
+  const nights = data.stay?.nights || null;
+  const ci = data.stay?.check_in ? " (" + data.stay.check_in + " → " + data.stay.check_out + ")" : "";
+  $("matrix-sub").textContent = nights
+    ? `Same room. Same ${nights}-night stay${ci}. Prices below are TOTALS — per-night shown under each.`
+    : "Same room. Same stay. Prices below are TOTALS — per-night shown under each.";
+  const fares = [...(data.fares || [])].filter((f) => f.total_price != null && f.total_price > 0).sort((a, b) => a.total_price - b.total_price);
+  const list = $("fare-list");
+  list.innerHTML = "";
+  if (!fares.length) {
+    list.innerHTML = '<p class="text-slate-500 text-sm bg-white p-4 rounded-xl border">No live platform prices available for these dates yet.</p>';
+    $("savings-ribbon").classList.add("hidden");
+    return;
+  }
+
+  if (data.savings_inr > 0) {
+    const ribbon = $("savings-ribbon");
+    ribbon.classList.remove("hidden");
+    ribbon.innerHTML = `💸 You save <span class="text-lg">${money(data.savings_inr)}</span> (${esc(data.savings_pct)}%) over the whole${nights ? " " + nights + "-night" : ""} stay by picking ${esc(data.cheapest_source || "the cheapest platform")} instead of the priciest option. Same room, zero effort.`;
+  } else {
+    $("savings-ribbon").classList.add("hidden");
+  }
+
+  fares.forEach((f) => {
+    const note = (data.perk_value_notes || {})[f.source] || {};
+    const isCheapest = f.source === data.cheapest_source;
+    const nightly = f.base_price && f.base_price > 0 && f.total_price && f.base_price <= f.total_price
+      ? f.base_price
+      : (f.total_price && nights && f.total_price >= nights ? Math.round(f.total_price / nights) : null);
+    const row = document.createElement("div");
+    row.className = "bg-white rounded-2xl border border-slate-200 shadow-sm p-4 flex flex-col md:flex-row md:items-center gap-4";
+    const perks = [];
+    if (f.breakfast) perks.push('<span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-xs font-medium">🍳 Breakfast included</span>');
+    if (f.free_cancellation) perks.push('<span class="px-2 py-0.5 rounded-full bg-sky-100 text-sky-800 text-xs font-medium">↩️ Free cancellation</span>');
+    if (isCheapest) perks.push('<span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold">✅ CHEAPEST</span>');
+
+    const bookHref = f.link ? esc(f.link) : null;
+    row.innerHTML = `
+      <div class="md:w-52">
+        <div class="font-bold text-base">${platformLabel(f.source)}</div>
+        <div class="flex flex-wrap gap-1 mt-2">${perks.join("")}</div>
+      </div>
+      <div class="grow">
+        ${note.net_value_note ? '<p class="text-sm bg-yellow-50 border border-yellow-200 rounded-xl px-3 py-2 text-slate-700">🧠 ' + esc(note.net_value_note) + (note.verdict ? ' <span class="ml-1 px-2 py-0.5 rounded-full bg-slate-800 text-white text-[10px] font-semibold uppercase">' + esc(note.verdict.replace(/_/g, " ")) + "</span>" : "") + "</p>" : ""}
+      </div>
+      <div class="text-right">
+        <div class="text-2xl font-extrabold">${money(f.total_price)}</div>
+        <div class="text-xs text-slate-500 mt-0.5">total${nights ? " · " + nights + " nights" : ""}</div>
+        ${nightly ? `<div class="text-sm font-semibold text-slate-600 mt-1">≈ ${esc(money(nightly))}/night</div>` : ""}
+      </div>
+      <div class="md:text-right">
+        ${bookHref ? `<a href="${bookHref}" target="_blank" rel="noopener noreferrer" class="inline-block bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition">Book on ${esc(f.source)}</a>` : '<span class="text-slate-400 text-sm">No direct link</span>'}
+      </div>`;
+    list.appendChild(row);
+  });
+}
+
+/* ---------------- boot ---------------- */
+window.addEventListener("DOMContentLoaded", () => {
+  renderTelemetry();
+  checkHealth();
+});
+</script>
+</body>
+</html>
